@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Apartment;
 use App\Observers\PropertyObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,11 @@ class Property extends Model
         parent::booted();
  
         self::observe(PropertyObserver::class);
+    }
+
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class);
     }
 
 }
