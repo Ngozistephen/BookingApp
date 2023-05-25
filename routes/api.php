@@ -23,7 +23,14 @@ Route::post('auth/login', App\Http\Controllers\Auth\LoginController::class);
  
 Route::middleware('auth:sanctum')->group(function() {
     
-    Route::get('owner/properties',[\App\Http\Controllers\Owner\PropertyController::class, 'index']);
-    Route::post('owner/properties',[\App\Http\Controllers\Owner\PropertyController::class, 'store']);
-    Route::get('user/bookings',[\App\Http\Controllers\User\BookingController::class, 'index']);
+    Route::prefix('owner')->group(function () {
+        Route::get('properties',[\App\Http\Controllers\Owner\PropertyController::class, 'index']);
+        Route::post('properties',[\App\Http\Controllers\Owner\PropertyController::class, 'store']);
+    });
+
+    Route::prefix('user')->group(function () {
+        Route::get('bookings',[\App\Http\Controllers\User\BookingController::class, 'index']);
+    });
 });
+
+Route::get('search',\App\Http\Controllers\Public\PropertySearchController::class);
