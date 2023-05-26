@@ -65,4 +65,9 @@ class Apartment extends Model
         );
     }
 
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class);
+    }
+
 }

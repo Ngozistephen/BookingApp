@@ -23,5 +23,8 @@ class DatabaseSeeder extends Seeder
         $this->call(CitySeeder::class);
         $this->call(GeoobjectSeeder::class);
 
+        $this->call(FacilityCategorySeeder::class);
+        $this->call(FacilitySeeder::class);
+
     }
 }
