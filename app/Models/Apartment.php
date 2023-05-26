@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Bed;
+use App\Models\Room;
 use App\Models\Property;
 use App\Models\ApartmentType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Apartment extends Model
@@ -35,4 +38,31 @@ class Apartment extends Model
     {
         return $this->hasMany(Room::class);
     }
+
+    public function beds()
+    {
+        return $this->hasManyThrough(Bed::class, Room::class);
+    }
+
+    public function bedsList(): Attribute
+    {
+        $allBeds = $this->beds;
+        $bedsByType = $allBeds->groupBy('bed_type.name');
+        $bedsList = '';
+        if ($bedsByType->count() == 1) {
+            $bedsList = $allBeds->count() . ' ' . str($bedsByType->keys()[0])->plural($allBeds->count());
+        } else if ($bedsByType->count() > 1) {
+            $bedsList = $allBeds->count() . ' ' . str('bed')->plural($allBeds->count());
+            $bedsListArray = [];
+            foreach ($bedsByType as $bedType => $beds) {
+                $bedsListArray[] = $beds->count() . ' ' . str($bedType)->plural($beds->count());
+            }
+            $bedsList .= ' ('.implode(', ' , $bedsListArray) .')';
+        }
+ 
+        return new Attribute(
+            get: fn () => $bedsList
+        );
+    }
+
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Apartment;
 use App\Observers\PropertyObserver;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Property extends Model
@@ -37,6 +38,15 @@ class Property extends Model
     public function apartments()
     {
         return $this->hasMany(Apartment::class);
+    }
+
+    public function address(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->address_street
+                 . ', ' . $this->address_postcode
+                 . ', ' . $this->city->name
+        );
     }
 
 }
