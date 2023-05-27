@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Facility;
 use App\Models\Apartment;
 use App\Observers\PropertyObserver;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,11 @@ class Property extends Model
                  . ', ' . $this->address_postcode
                  . ', ' . $this->city->name
         );
+    }
+
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class);
     }
 
 }
