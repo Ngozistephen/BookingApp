@@ -6,6 +6,8 @@ use App\Models\Bed;
 use App\Models\Room;
 use App\Models\Property;
 use App\Models\ApartmentType;
+use App\Models\ApartmentPrice;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
@@ -70,6 +72,34 @@ class Apartment extends Model
     public function facilities()
     {
         return $this->belongsToMany(Facility::class);
+    }
+
+    public function prices()
+    {
+        return $this->hasMany(ApartmentPrice::class);
+    }
+
+    // To come back and learn again 
+    public function calculatePriceForDates($startDate, $endDate)
+    {
+        // Convert to Carbon if not already
+        if (!$startDate instanceof Carbon) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+        }
+        if (!$endDate instanceof Carbon) {
+            $endDate = Carbon::parse($endDate)->endOfDay();
+        }
+ 
+        $cost = 0;
+ 
+        while ($startDate->lte($endDate)) {
+            $cost += $this->prices->where(function (ApartmentPrice $price) use ($startDate) {
+                return $price->start_date->lte($startDate) && $price->end_date->gte($startDate);
+            })->value('price');
+            $startDate->addDay();
+        }
+ 
+        return $cost;
     }
 
 }
