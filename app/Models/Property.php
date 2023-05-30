@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Booking;
 use App\Models\Facility;
 use App\Models\Apartment;
 use Spatie\MediaLibrary\HasMedia;
@@ -65,6 +66,11 @@ class Property extends Model implements HasMedia
     public function registerMediaConversions(Media $media = null): void
     {
         $this->addMediaConversion('thumbnail')->width(800);
+    }
+
+    public function bookings()
+    {
+        return $this->hasManyThrough(Booking::class, Apartment::class);
     }
 
 }

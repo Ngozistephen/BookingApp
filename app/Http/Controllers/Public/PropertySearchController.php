@@ -13,8 +13,8 @@ class PropertySearchController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $properties = Property::query()->with
-            ([
+        $properties = Property::query()
+            ->with([
                 // add rooms,bed and bed types to search
                 'city',
                 'apartments.apartment_type',
@@ -29,59 +29,61 @@ class PropertySearchController extends Controller
                 'facilities',
                 'media' => fn($query) => $query->orderBy('position'),
             ])
-            ->when($request->city, function($query) use ($request){
-                $query->where('city_id', $request->city);
-            })
-            // search by country
-            ->when($request->country, function($query) use ($request) {
-                $query->whereHas('city', fn($q) => $q->where('country_id', $request->country));
-            })
+            ->withAvg('bookings', 'rating')
+                ->when($request->city, function($query) use ($request){
+                    $query->where('city_id', $request->city);
+                })
+                // search by country
+                ->when($request->country, function($query) use ($request) {
+                    $query->whereHas('city', fn($q) => $q->where('country_id', $request->country));
+                })
 
-            // search by GeoObject
-            ->when($request->geoobject, function($query) use ($request) {
-                $geoobject = Geoobject::find($request->geoobject);
-                if ($geoobject) {
-                    $condition = "(
-                        6371 * acos(
-                            cos(radians(" . $geoobject->lat . "))
-                            * cos(radians(`lat`))
-                            * cos(radians(`long`) - radians(" . $geoobject->long . "))
-                            + sin(radians(" . $geoobject->lat . ")) * sin(radians(`lat`))
-                        ) < 10
-                    )";
-                    $query->whereRaw($condition);
-                }
-            })
+                // search by GeoObject
+                ->when($request->geoobject, function($query) use ($request) {
+                    $geoobject = Geoobject::find($request->geoobject);
+                    if ($geoobject) {
+                        $condition = "(
+                            6371 * acos(
+                                cos(radians(" . $geoobject->lat . "))
+                                * cos(radians(`lat`))
+                                * cos(radians(`long`) - radians(" . $geoobject->long . "))
+                                + sin(radians(" . $geoobject->lat . ")) * sin(radians(`lat`))
+                            ) < 10
+                        )";
+                        $query->whereRaw($condition);
+                    }
+                })
 
-            // by children and Adults
-            ->when($request->adults && $request->children, function($query) use ($request) {
-                $query->withWhereHas('apartments', function($query) use ($request) {
-                    $query->where('capacity_adults', '>=', $request->adults)
-                        ->where('capacity_children', '>=', $request->children)
-                        ->orderBy('capacity_adults') 
-                        ->orderBy('capacity_children')
-                        ->take(1);
-                });
-            })
+                // Search by children and Adults
+                ->when($request->adults && $request->children, function($query) use ($request) {
+                    $query->withWhereHas('apartments', function($query) use ($request) {
+                        $query->where('capacity_adults', '>=', $request->adults)
+                            ->where('capacity_children', '>=', $request->children)
+                            ->orderBy('capacity_adults') 
+                            ->orderBy('capacity_children')
+                            ->take(1);
+                    });
+                })
 
-            // filter by facilities
-            ->when($request->facilities, function($query) use ($request) {
-                $query->whereHas('facilities', function($query) use ($request) {
-                    $query->whereIn('facilities.id', $request->facilities);
-                });
-            })
+                // filter by facilities
+                ->when($request->facilities, function($query) use ($request) {
+                    $query->whereHas('facilities', function($query) use ($request) {
+                        $query->whereIn('facilities.id', $request->facilities);
+                    });
+                })
 
-            // filter by Prices
-            ->when($request->price_from, function($query) use ($request) {
-                $query->whereHas('apartments.prices', function($query) use ($request) {
-                    $query->where('price', '>=', $request->price_from);
-                });
-            })
-            ->when($request->price_to, function($query) use ($request) {
-                $query->whereHas('apartments.prices', function($query) use ($request) {
-                    $query->where('price', '<=', $request->price_to);
-                });
-            })
+                // filter by Prices
+                ->when($request->price_from, function($query) use ($request) {
+                    $query->whereHas('apartments.prices', function($query) use ($request) {
+                        $query->where('price', '>=', $request->price_from);
+                    });
+                })
+                ->when($request->price_to, function($query) use ($request) {
+                    $query->whereHas('apartments.prices', function($query) use ($request) {
+                        $query->where('price', '<=', $request->price_to);
+                    });
+                })
+            ->orderBy('bookings_avg_rating', 'desc')    
             ->get();
 
             $facilities = Facility::query()

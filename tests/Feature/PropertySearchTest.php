@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\BedType;
+use App\Models\Booking;
 use App\Models\Country;
 use App\Models\Facility;
 use App\Models\Property;
@@ -433,4 +434,67 @@ class PropertySearchTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonCount(0, 'properties');
     }
+
+    public function test_properties_show_correct_rating_and_ordered_by_it()
+    {
+        $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        $cityId = City::value('id');
+        $property = Property::factory()->create([
+            'owner_id' => $owner->id,
+            'city_id' => $cityId,
+        ]);
+        $apartment1 = Apartment::factory()->create([
+            'name' => 'Cheap apartment',
+            'property_id' => $property->id,
+            'capacity_adults' => 2,
+            'capacity_children' => 1,
+        ]);
+        $property2 = Property::factory()->create([
+            'owner_id' => $owner->id,
+            'city_id' => $cityId,
+        ]);
+        $apartment2 = Apartment::factory()->create([
+            'name' => 'Mid size apartment',
+            'property_id' => $property2->id,
+            'capacity_adults' => 2,
+            'capacity_children' => 1,
+        ]);
+        $user1 = User::factory()->create()->assignRole(Role::ROLE_USER);
+        $user2 = User::factory()->create()->assignRole(Role::ROLE_USER);
+        Booking::create([
+            'apartment_id' => $apartment1->id,
+            'user_id' => $user1->id,
+            'start_date' => now()->addDay(),
+            'end_date' => now()->addDays(2),
+            'guests_adults' => 1,
+            'guests_children' => 0,
+            'rating' => 7
+        ]);
+        Booking::create([
+            'apartment_id' => $apartment2->id,
+            'user_id' => $user1->id,
+            'start_date' => now()->addDay(),
+            'end_date' => now()->addDays(2),
+            'guests_adults' => 1,
+            'guests_children' => 0,
+            'rating' => 9
+        ]);
+        Booking::create([
+            'apartment_id' => $apartment2->id,
+            'user_id' => $user2->id,
+            'start_date' => now()->addDay(),
+            'end_date' => now()->addDays(2),
+            'guests_adults' => 1,
+            'guests_children' => 0,
+            'rating' => 7
+        ]);
+    
+        $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1');
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'properties');
+        $this->assertEquals(8, $response->json('properties')[0]['avg_rating']);
+        $this->assertEquals(7, $response->json('properties')[1]['avg_rating']);
+    }
+
+    // PropertySearchTest if all failing with assertCount(): Argument #2 ($haystack) must be of type Countable|iterable, null given,
 }
