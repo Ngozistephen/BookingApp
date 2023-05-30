@@ -26,7 +26,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('apartments', function (Blueprint $table) {
-            //
+            $table->foreignId('apartment_type_id')
+            ->nullable()
+            ->after('id')
+            ->constrained();
         });
     }
 };

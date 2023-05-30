@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Bed;
 use App\Models\Room;
+use App\Models\Booking;
 use App\Models\Property;
 use App\Models\ApartmentType;
 use App\Models\ApartmentPrice;
@@ -100,6 +101,11 @@ class Apartment extends Model
         }
  
         return $cost;
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 
 }
