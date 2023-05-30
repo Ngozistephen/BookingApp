@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -37,4 +38,18 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    // public function owner()
+    // {
+    //     return $this->state(fn(array $attributes) => [
+    //         'role_id' => Role::ROLE_OWNER,
+    //     ]);
+    // }
+
+    // public function user()
+    // {
+    //     return $this->state(fn(array $attributes) => [
+    //         'role_id' => Role::ROLE_USER,
+    //     ]);
+    // }
 }

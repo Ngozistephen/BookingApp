@@ -13,7 +13,7 @@ class PropertySearchController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $properties = Property::query()
+        $propertiesQuery = Property::query()
             ->with([
                 // add rooms,bed and bed types to search
                 'city',
@@ -83,21 +83,25 @@ class PropertySearchController extends Controller
                         $query->where('price', '<=', $request->price_to);
                     });
                 })
-            ->orderBy('bookings_avg_rating', 'desc')    
-            ->get();
+            ->orderBy('bookings_avg_rating', 'desc');    
+            // ->get();
 
             $facilities = Facility::query()
-                ->withCount(['properties' => function ($property) use ($properties) {
-                    $property->whereIn('id', $properties->pluck('id'));
+                ->withCount(['properties' => function ($property) use ($propertiesQuery) {
+                    $property->whereIn('id', $propertiesQuery->pluck('id'));
                 }])
                 ->get()
                 ->where('properties_count', '>', 0)
                 ->sortByDesc('properties_count')
                 ->pluck('properties_count', 'name');
 
+            $properties = $propertiesQuery->paginate(10)->withQueryString();    
+
             return [
                 
-                PropertySearchResource::collection($properties),
+                PropertySearchResource::collection($properties)
+                    ->response()
+                    ->getData(true),
                 'facilities' => $facilities,
             ];
     }

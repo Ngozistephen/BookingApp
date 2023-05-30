@@ -29,6 +29,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_by_city_returns_correct_results(): void
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cities = City::take(2)->pluck('id');
         $propertyInCity = Property::factory()->create(['owner_id' => $owner->id, 'city_id' => $cities[0]]);
         $propertyInAnotherCity = Property::factory()->create(['owner_id' => $owner->id, 'city_id' => $cities[1]]);
@@ -45,6 +46,7 @@ class PropertySearchTest extends TestCase
     {
        
     $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+    // $owner = User::factory()->owner()->create();
     $countries = Country::with('cities')->take(2)->get();
     $propertyInCountry = Property::factory()->create([
         'owner_id' => $owner->id,
@@ -65,6 +67,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_by_geoobject_returns_correct_results(): void
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $geoobject = Geoobject::first();
         $propertyNear = Property::factory()->create([
@@ -91,6 +94,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_by_capacity_returns_correct_results(): void
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $propertyWithSmallApartment = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -121,6 +125,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_by_capacity_returns_only_suitable_apartments(): void
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $property = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -153,6 +158,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_returns_one_best_apartment_per_property()
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $property = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -214,6 +220,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_beds_list_all_cases(): void
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
@@ -327,6 +334,7 @@ class PropertySearchTest extends TestCase
     public function test_property_search_filters_by_facilities()
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $property = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -352,31 +360,32 @@ class PropertySearchTest extends TestCase
         // First case - no facilities exist
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1');
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'properties');
+        $response->assertJsonCount(2, 'properties.data');
  
         // Second case - filter by facility, 0 properties returned
         $facility = Facility::create(['name' => 'First facility']);
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&facilities[]=' . $facility->id);
         $response->assertStatus(200);
-        $response->assertJsonCount(0, 'properties');
+        $response->assertJsonCount(0, 'properties.data');
  
         // Third case - attach facility to property, filter by facility, 1 property returned
         $property->facilities()->attach($facility->id);
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&facilities[]=' . $facility->id);
         $response->assertStatus(200);
-        $response->assertJsonCount(1, 'properties');
+        $response->assertJsonCount(1, 'properties.data');
  
         // Fourth case - attach facility to a DIFFERENT property, filter by facility, 2 properties returned
         $property2->facilities()->attach($facility->id);
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&facilities[]=' . $facility->id);
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'properties');
+        $response->assertJsonCount(2, 'properties.data');
     }
 
 
     public function test_property_search_filters_by_price()
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $property = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -412,17 +421,17 @@ class PropertySearchTest extends TestCase
         // First case - no price range: both returned
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1');
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'properties');
+        $response->assertJsonCount(2, 'properties.data');
     
         // First case - min price set: 1 returned
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&price_from=100');
         $response->assertStatus(200);
-        $response->assertJsonCount(1, 'properties');
+        $response->assertJsonCount(1, 'properties.data');
     
         // Second case - max price set: 1 returned
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&price_to=100');
         $response->assertStatus(200);
-        $response->assertJsonCount(1, 'properties');
+        $response->assertJsonCount(1, 'properties.data');
     
         // Third case - both min and max price set: 2 returned
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&price_from=50&price_to=150');
@@ -432,12 +441,13 @@ class PropertySearchTest extends TestCase
         // Fourth case - both min and max price set narrow: 0 returned
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1&price_from=80&price_to=100');
         $response->assertStatus(200);
-        $response->assertJsonCount(0, 'properties');
+        $response->assertJsonCount(0, 'properties.data');
     }
 
     public function test_properties_show_correct_rating_and_ordered_by_it()
     {
         $owner = User::factory()->create()->assignRole(Role::ROLE_OWNER);
+        // $owner = User::factory()->owner()->create();
         $cityId = City::value('id');
         $property = Property::factory()->create([
             'owner_id' => $owner->id,
@@ -461,6 +471,8 @@ class PropertySearchTest extends TestCase
         ]);
         $user1 = User::factory()->create()->assignRole(Role::ROLE_USER);
         $user2 = User::factory()->create()->assignRole(Role::ROLE_USER);
+        // $user1 = User::factory()->user()->create();
+        // $user2 = User::factory()->user()->create();
         Booking::create([
             'apartment_id' => $apartment1->id,
             'user_id' => $user1->id,
@@ -491,9 +503,9 @@ class PropertySearchTest extends TestCase
     
         $response = $this->getJson('/api/search?city=' . $cityId . '&adults=2&children=1');
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'properties');
-        $this->assertEquals(8, $response->json('properties')[0]['avg_rating']);
-        $this->assertEquals(7, $response->json('properties')[1]['avg_rating']);
+        $response->assertJsonCount(2, 'properties.data');
+        $this->assertEquals(8, $response->json('properties.data')[0]['avg_rating']);
+        $this->assertEquals(7, $response->json('properties.data')[1]['avg_rating']);
     }
 
     // PropertySearchTest if all failing with assertCount(): Argument #2 ($haystack) must be of type Countable|iterable, null given,
