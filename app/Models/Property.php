@@ -30,6 +30,8 @@ class Property extends Model implements HasMedia
         'long',
     ];
 
+    
+
 
     public function city()
     {

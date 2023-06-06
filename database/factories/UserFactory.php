@@ -39,17 +39,17 @@ class UserFactory extends Factory
         ]);
     }
 
-    // public function owner()
-    // {
-    //     return $this->state(fn(array $attributes) => [
-    //         'role_id' => Role::ROLE_OWNER,
-    //     ]);
-    // }
+    public function owner()
+    {
+        return $this->state(fn(array $attributes) => [
+            'role_id' => Role::ROLE_OWNER,
+        ]);
+    }
 
-    // public function user()
-    // {
-    //     return $this->state(fn(array $attributes) => [
-    //         'role_id' => Role::ROLE_USER,
-    //     ]);
-    // }
+    public function user()
+    {
+        return $this->state(fn(array $attributes) => [
+            'role_id' => Role::ROLE_USER,
+        ]);
+    }
 }

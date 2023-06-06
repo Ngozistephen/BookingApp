@@ -18,10 +18,10 @@ class CityFactory extends Factory
     public function definition(): array
     {
         return [
+            'country_id' => Country::inRandomOrder()->value('id'),
             'name' => fake()->name(),
             'lat' => fake()->latitude(),
             'long' => fake()->longitude(),
-            'country_id' => Country::inRandomOrder()->value('id'),
         ];
     }
 }

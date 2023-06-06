@@ -1,0 +1,77 @@
+name: Authentication
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/register
+    metadata:
+      groupName: Authentication
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Register a new user.'
+      description: '[Creates a new user and returns a token for authentication.]'
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: gjobvzhmbvv
+        type: string
+        custom: []
+      email:
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: elisa08@example.com
+        type: string
+        custom: []
+      password:
+        name: password
+        description: ''
+        required: true
+        example: eos
+        type: string
+        custom: []
+      role_id:
+        name: role_id
+        description: "'role_id' => ['required', Rule::in(2, 3)], , this or the one at the top."
+        required: true
+        example: aut
+        type: string
+        custom: []
+    cleanBodyParameters:
+      name: gjobvzhmbvv
+      email: elisa08@example.com
+      password: eos
+      role_id: aut
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"access_token":"1|a9ZcYzIrLURVGx6Xe41HKj1CrNsxRxe4pLA2oISo"}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: '{"message":"The selected role id is invalid.","errors":{"role_id":["The selected role id is invalid."]}}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

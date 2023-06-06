@@ -7,8 +7,19 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApartmentSearchResource;
 
+/**
+ * @group Public
+ * @subgroup Apartments
+ */
 class ApartmentController extends Controller
 {
+     /**
+     * Get apartment details
+     *
+     * [Returns details about a specific apartment]
+     *
+     * @response {"name":"Large apartment","type":null,"size":null,"beds_list":"","bathrooms":0,"facility_categories":{"First category":["First facility","Second facility"],"Second category":["Third facility"]}}
+     */
     public function __invoke(Apartment $apartment)
     {
         $apartment->load('facilities.category');
