@@ -9,12 +9,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -25,8 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        
-        
+        'role_id'
     ];
 
     /**
@@ -59,5 +60,15 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function canAccessFilament(): bool
+    {
+        return $this->hasRole('Administrator');
+        
+    }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }
